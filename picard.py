@@ -14,8 +14,6 @@ class Auth:
                        socket.SOCK_DGRAM) # UDP
     self.sock.bind((self.UDP_IP, self.UDP_PORT))
     self.realm = 'picard@raspberrykai'
-    self.username = 'kai'
-    self.password = 'test'
     self.Config = ConfigParser.ConfigParser()
     self.Config.read('users.ini')
     self.nonces = {}
@@ -31,7 +29,6 @@ class Auth:
     while True:
       data, addr = self.sock.recvfrom(1024)
       print "received message:", data, addr
-      self.lookup('kai')
       try:
         decoded = json.loads(data)
         print 'DECODED:', decoded
@@ -49,7 +46,7 @@ class Auth:
         elif decoded['command'] == 'auth':
           print 'yay'
           m = md5.new()
-          m.update(self.username+':'+decoded['realm']+':'+self.password)
+          m.update(decoded['username']+':'+decoded['realm']+':'+self.Config.get('users', decoded['username']))
           ha1 = m.hexdigest()
           m.update('AUTH:'+str(decoded['sequence']))
           ha2 = m.hexdigest()
@@ -65,24 +62,27 @@ class Auth:
           self.sock.sendto(message, (self.UDP_IP, addr[1]))            
         else:
           print 'check hash'
-          print self.username
           print self.realm
-          m = md5.new()
-          m.update(self.username+':'+self.realm+':'+self.password)
-          ha1 = m.hexdigest()
-          m.update('AUTH:'+str(decoded['sequence']))
-          ha2 = m.hexdigest()
-          m.update(ha1+':'+self.nonces[decoded['username']]+':'+ha2)
-          if(decoded['hash'] == m.hexdigest()):
-            print 'correct hash'
-            print self.sequences[decoded['username']]
-            if(self.sequences[decoded['username']] < decoded['sequence']):
-              # execute command
-              self.sequences[decoded['username']] = decoded['sequence']
-              print 'received sequence > stored sequence'
+          if decoded['username'] in self.nonces:
+            m = md5.new()
+            m.update(decoded['username']+':'+self.realm+':'+self.Config.get('users', decoded['username']))
+            ha1 = m.hexdigest()
+            m.update('AUTH:'+str(decoded['sequence']))
+            ha2 = m.hexdigest()
+            m.update(ha1+':'+self.nonces[decoded['username']]+':'+ha2)
+            if(decoded['hash'] == m.hexdigest()):
+              print 'correct hash'
+              print self.sequences[decoded['username']]
+              if(self.sequences[decoded['username']] < decoded['sequence']):
+                # execute command
+                self.sequences[decoded['username']] = decoded['sequence']
+                print 'received sequence > stored sequence'
 
       except ValueError, e:
         print 'JSON decoding failed: '
+        print e
+      except KeyError, e:
+        print 'Missing Key, check the client implementation: '
         print e
 
 if __name__ == '__main__':
