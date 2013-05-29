@@ -14,13 +14,13 @@ class Auth:
                        socket.SOCK_DGRAM) # UDP
     self.sock.bind((self.UDP_IP, self.UDP_PORT))
     self.realm = 'picard@raspberrykai'
-    self.Config = ConfigParser.ConfigParser()
-    self.Config.read('users.ini')
+    self.Users = ConfigParser.ConfigParser()
+    self.Users.read('users.ini')
     self.nonces = {}
     self.sequences = {}
 
   def lookup(self,username):
-    if self.Config.has_option('users', username):
+    if self.Users.has_option('users', username):
       return True
     else:
       return False
@@ -46,7 +46,7 @@ class Auth:
         elif decoded['command'] == 'auth':
           print 'yay'
           m = md5.new()
-          m.update(decoded['username']+':'+decoded['realm']+':'+self.Config.get('users', decoded['username']))
+          m.update(decoded['username']+':'+decoded['realm']+':'+self.Users.get('users', decoded['username']))
           ha1 = m.hexdigest()
           m.update('AUTH:'+str(decoded['sequence']))
           ha2 = m.hexdigest()
@@ -65,7 +65,7 @@ class Auth:
           print self.realm
           if decoded['username'] in self.nonces:
             m = md5.new()
-            m.update(decoded['username']+':'+self.realm+':'+self.Config.get('users', decoded['username']))
+            m.update(decoded['username']+':'+self.realm+':'+self.Users.get('users', decoded['username']))
             ha1 = m.hexdigest()
             m.update('AUTH:'+str(decoded['sequence']))
             ha2 = m.hexdigest()
