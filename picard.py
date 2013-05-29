@@ -4,6 +4,11 @@ import random
 from Crypto.Random.random import getrandbits
 import md5
 import ConfigParser
+try:
+  from RPIO import PWM
+  DEBUG = False
+except ImportError:
+  DEBUG = True
 
 class Auth:
   def __init__(self):
@@ -16,8 +21,32 @@ class Auth:
     self.realm = 'picard@raspberrykai'
     self.Users = ConfigParser.ConfigParser()
     self.Users.read('users.ini')
+    self.Settings = ConfigParser.ConfigParser()
+    self.Settings.read('settings.ini')
+    self.limits = dict(self.Settings.items('settings'))
+    self.servoDirection = int(self.limits['straight'])
     self.nonces = {}
     self.sequences = {}
+    if not DEBUG:
+      self.servo = PWM.Servo(0,20000,int(self.limits['step']))
+
+  def setServo(self, pin, value):
+    if not DEBUG:
+      self.servo.set_servo(pin, value)
+
+  def moveInDirection(self,direction):
+    if(direction == 'left'):
+      if(self.servoDirection-int(self.limits['step']) > int(self.limits['maxleft'])):
+        self.servoDirection -= int(self.limits['step'])
+        print 'moving ' , direction, ' value: ', self.servoDirection
+        self.setServo(25, self.servoDirection)
+    elif(direction == 'right'):
+      if(self.servoDirection+int(self.limits['step']) < int(self.limits['maxright'])):
+        self.servoDirection += int(self.limits['step'])
+        self.setServo(25, self.servoDirection)
+
+  def moveInDicrection(self,direction,percentage):
+    print 'moep'
 
   def lookup(self,username):
     if self.Users.has_option('users', username):
@@ -77,6 +106,9 @@ class Auth:
                 # execute command
                 self.sequences[decoded['username']] = decoded['sequence']
                 print 'received sequence > stored sequence'
+                if decoded['command'].startswith('move'):
+                  command = decoded['command'].replace('move','')
+                  self.moveInDirection(command)
 
       except ValueError, e:
         print 'JSON decoding failed: '
