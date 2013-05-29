@@ -12,7 +12,7 @@ class Auth:
     self.sequence = 0
     self.sock = socket.socket(socket.AF_INET, # Internet
                        socket.SOCK_DGRAM) # UDP
-    self.sock.bind((self.UDP_IP, self.UDP_PORT))
+    self.sock.bind(('', self.UDP_PORT))
     self.realm = 'picard@raspberrykai'
     self.Users = ConfigParser.ConfigParser()
     self.Users.read('users.ini')
@@ -42,7 +42,7 @@ class Auth:
             message = '{"sequence":'+str(self.sequences[decoded['username']])+',"realm":"'+self.realm+'", "nonce":"'+self.nonces[decoded['username']]+'"}'
           else:
             message = '{"error":"username not found"}'
-          self.sock.sendto(message, (self.UDP_IP, addr[1]))
+          self.sock.sendto(message, (addr[0], addr[1]))
         elif decoded['command'] == 'auth':
           print 'yay'
           m = md5.new()
@@ -59,7 +59,7 @@ class Auth:
             message = '{"info":"authenticated"}'
           else:
             message = '{"error":"unauthorized"}'
-          self.sock.sendto(message, (self.UDP_IP, addr[1]))            
+          self.sock.sendto(message, (addr[0], addr[1]))            
         else:
           print 'check hash'
           print self.realm
