@@ -7,6 +7,10 @@ import pygame
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
 
+# this funktion is used to convert the axes to steering information
+def sendCommands(right, left, forward,backwards, brake):
+	print("fooooooo")
+
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -33,6 +37,7 @@ class TextPrint:
     
 
 pygame.init()
+
  
 # Set the width and height of the screen [width,height]
 size = [500, 700]
@@ -60,10 +65,22 @@ while done==False:
             done=True # Flag that we are done so we exit this loop
         
         # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
+        #every button is handbrake
         if event.type == pygame.JOYBUTTONDOWN:
-            print("Joystick button pressed.")
+        	print("Handbrake pressed.")
         if event.type == pygame.JOYBUTTONUP:
-            print("Joystick button released.")
+            	print("Handbrake released.")
+        # my own events
+        if event.type == pygame.JOYAXISMOTION:
+        	if event.axis == 3:
+        		# event.value between RECHTS = 1 / LINKS = -1 
+        		print("right/left")
+        	if event.axis == 5:
+        		# vorwaerts : -1 ist still, 1 ist vollgas
+        		print("forward")
+        	if event.axis == 2:
+        		# backwards : -1 ist still, 1 ist vollgas
+        		print("backwards")
             
  
     # DRAWING STEP
@@ -89,6 +106,7 @@ while done==False:
         # Get the name from the OS for the controller/joystick
         name = joystick.get_name()
         textPrint.foo(screen, "Joystick name: {}".format(name) )
+        
         
         # Usually axis run in pairs, up/down for one, and left/right for
         # the other.
