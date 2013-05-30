@@ -19,6 +19,8 @@ right = 0.0
 accelerate_axis = 5
 decelerate_axis = 2
 steering_axis = 0
+trimbutton = 7
+trim = False
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -51,7 +53,7 @@ pygame.init()
 size = [200, 100]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("PiCarD-Remote")
+pygame.display.set_caption("PiCarD-Remote-360")
 
 #Loop until the user clicks the close button.
 done = False
@@ -77,6 +79,7 @@ while done==False:
         if event.type == pygame.JOYBUTTONDOWN:
         	       # handbrake = joystick.get_button(joybutton)
         	handbrake = True
+        	trim = joystick.get_button(trimbutton)
         	#print("Handbrake pressed.")
         if event.type == pygame.JOYBUTTONUP:
         	handbrake = False
@@ -84,6 +87,7 @@ while done==False:
         	#crappy code, but works
         	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
             	#print("Handbrake released.")
+            	trim = joystick.get_button(trimbutton)
         # my own events
         if event.type == pygame.JOYAXISMOTION:
         #alternative rechts/links = axis 3
@@ -116,6 +120,7 @@ while done==False:
         joystick.init()
     
     #print own foo
+    textPrint.foo(screen, "trim value: {}".format(trim) )
     textPrint.foo(screen, "handbrake value: {}".format(handbrake) )
     #textPrint.indent()
     textPrint.foo(screen, "forward value: {}".format(forward) )

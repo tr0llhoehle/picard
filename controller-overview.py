@@ -7,20 +7,15 @@ import pygame
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
 
-# this funktion is used to convert the axes to steering information
-def sendCommands(right, left, forward,backwards, brake):
-	print("fooooooo")
 
 #handbrake pressed -> handbrake = True
 handbrake = False
 forward = 0.0
 right = 0.0
-joybutton = 14
-accelerate_axis = 13
-decelerate_axis = 12
+#joybutton = 14
+accelerate_axis = 5
+decelerate_axis = 2
 steering_axis = 0
-trimbutton = 3
-trim = False
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -50,10 +45,10 @@ pygame.init()
 
  
 # Set the width and height of the screen [width,height]
-size = [200, 100]
+size = [300, 1700]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("PiCarD-Remote-PS3")
+pygame.display.set_caption("PiCarD-Remote")
 
 #Loop until the user clicks the close button.
 done = False
@@ -77,43 +72,30 @@ while done==False:
         # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
         #every button is handbrake
         if event.type == pygame.JOYBUTTONDOWN:
-        	        handbrake = joystick.get_button(joybutton)
-        	        trim = joystick.get_button(trimbutton)
-        	#handbrake = True
+        	       # handbrake = joystick.get_button(joybutton)
+        	handbrake = True
         	#print("Handbrake pressed.")
         if event.type == pygame.JOYBUTTONUP:
-        	#handbrake = False
-        	handbrake = joystick.get_button(joybutton)
-        	trim = joystick.get_button(trimbutton)
+        	handbrake = False
+        	#handbrake = joystick.get_button(joybutton)
         	#crappy code, but works
-        	#
+        	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
             	#print("Handbrake released.")
         # my own events
         if event.type == pygame.JOYAXISMOTION:
         #alternative rechts/links = axis 3
         	if event.axis == steering_axis:
         		right = joystick.get_axis(event.axis)
-#        		if abs(right) < 0.2:
-#        			right = 0.0
-        		# event.value between RECHTS = 1 / LINKS = -1 
-        		#print("right/left")
-        		#print"right value: {}".format(right)
-        	if handbrake == False:
-#			if event.axis == 5:
-#				# vorwaerts : -1 ist still, 1 ist vollgas
-#				forward_in = joystick.get_axis(5)+1
-#				#print("forward")
-#			if event.axis == 2:
-#				# backwards : -1 ist still, 1 ist vollgas
-#				#print("backwards")
-#				backward_in = joystick.get_axis(2)+1
+        		if abs(right) < 0.2:
+        			right = 0.0
+        	if handbrake == True:
+        		forward = 0.0;
+
+		else:
 			if joystick.get_numaxes() >= accelerate_axis and joystick.get_numaxes() >= decelerate_axis:
 				if event.axis == accelerate_axis or event.axis == decelerate_axis:
 					forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
 					#print"forward value: {}".format(forward)
-		else:
-			forward = 0.0;
-			#print"forward value: {}".format(forward)
 		    
  
     # DRAWING STEP
@@ -131,7 +113,6 @@ while done==False:
         joystick.init()
     
     #print own foo
-    textPrint.foo(screen, "trim value: {}".format(trim) )
     textPrint.foo(screen, "handbrake value: {}".format(handbrake) )
     #textPrint.indent()
     textPrint.foo(screen, "forward value: {}".format(forward) )
@@ -141,54 +122,54 @@ while done==False:
     
 
 
-#    textPrint.foo(screen, "Number of joysticks: {}".format(joystick_count) )
-#    textPrint.indent()
-#    
-#    # For each joystick:
-#    for i in range(joystick_count):
-#        joystick = pygame.joystick.Joystick(i)
-#        joystick.init()
-#    
-#        textPrint.foo(screen, "Joystick {}".format(i) )
-#        textPrint.indent()
-#    
-#        # Get the name from the OS for the controller/joystick
-#        name = joystick.get_name()
-#        textPrint.foo(screen, "Joystick name: {}".format(name) )
-#        
-#        
-#        # Usually axis run in pairs, up/down for one, and left/right for
-#        # the other.
-#        axes = joystick.get_numaxes()
-#        textPrint.foo(screen, "Number of axes: {}".format(axes) )
-#        textPrint.indent()
-#        
-#        for i in range( axes ):
-#            axis = joystick.get_axis( i )
-#            textPrint.foo(screen, "Axis {} value: {:>6.3f}".format(i, axis) )
-#        textPrint.unindent()
-#            
-#        buttons = joystick.get_numbuttons()
-#        textPrint.foo(screen, "Number of buttons: {}".format(buttons) )
-#        textPrint.indent()
+    textPrint.foo(screen, "Number of joysticks: {}".format(joystick_count) )
+    textPrint.indent()
+    
+    # For each joystick:
+    for i in range(joystick_count):
+        joystick = pygame.joystick.Joystick(i)
+        joystick.init()
+    
+        textPrint.foo(screen, "Joystick {}".format(i) )
+        textPrint.indent()
+    
+        # Get the name from the OS for the controller/joystick
+        name = joystick.get_name()
+        textPrint.foo(screen, "Joystick name: {}".format(name) )
+        
+        
+        # Usually axis run in pairs, up/down for one, and left/right for
+        # the other.
+        axes = joystick.get_numaxes()
+        textPrint.foo(screen, "Number of axes: {}".format(axes) )
+        textPrint.indent()
+        
+        for i in range( axes ):
+            axis = joystick.get_axis( i )
+            textPrint.foo(screen, "Axis {} value: {:>6.3f}".format(i, axis) )
+        textPrint.unindent()
+            
+        buttons = joystick.get_numbuttons()
+        textPrint.foo(screen, "Number of buttons: {}".format(buttons) )
+        textPrint.indent()
 
-#        for i in range( buttons ):
-#            button = joystick.get_button( i )
-#            textPrint.foo(screen, "Button {:>2} value: {}".format(i,button) )
-#        textPrint.unindent()
-#            
-#        # Hat switch. All or nothing for direction, not like joysticks.
-#        # Value comes back in an array.
-#        hats = joystick.get_numhats()
-#        textPrint.foo(screen, "Number of hats: {}".format(hats) )
-#        textPrint.indent()
+        for i in range( buttons ):
+            button = joystick.get_button( i )
+            textPrint.foo(screen, "Button {:>2} value: {}".format(i,button) )
+        textPrint.unindent()
+            
+        # Hat switch. All or nothing for direction, not like joysticks.
+        # Value comes back in an array.
+        hats = joystick.get_numhats()
+        textPrint.foo(screen, "Number of hats: {}".format(hats) )
+        textPrint.indent()
 
-#        for i in range( hats ):
-#            hat = joystick.get_hat( i )
-#            textPrint.foo(screen, "Hat {} value: {}".format(i, str(hat)) )
-#        textPrint.unindent()
-#        
-#        textPrint.unindent()
+        for i in range( hats ):
+            hat = joystick.get_hat( i )
+            textPrint.foo(screen, "Hat {} value: {}".format(i, str(hat)) )
+        textPrint.unindent()
+        
+        textPrint.unindent()
 
     
     # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
