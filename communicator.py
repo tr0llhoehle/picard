@@ -1,3 +1,4 @@
+#!/usr/bin/python2.7
 import socket
 import curses
 import time
@@ -69,19 +70,33 @@ class Communication:
 		m.update(ha1+':'+self.nonce+':'+ha2)
 		return m.hexdigest()
 
-def main(screen):
+	def movePercentage(self,direction,percentage):
+		self.sequence += 1
+		hash = self.gethash()
+		command = 'move' + direction
+		message = '{"sequence":'+str(self.sequence)+',"command":"'+command+'", "percentage":'+str(percentage)+', "username":"'+self.username+'", "hash":"'+hash+'"}'
+		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
 
+def main(screen):
 	comm = Communication(screen, username, password, ip, port, sourceport)
 	screen.nodelay(1)
+	percentagedir = 100
+	percentage = 10
 	while True:
-	    char = screen.getch()
-	    if char == 113: break  # q
-	    elif char == 97: comm.auth() # a = authentication
-	    elif char == curses.KEY_RIGHT: comm.sendmessage('moveright')
-	    elif char == curses.KEY_LEFT: comm.sendmessage('moveleft')
-	    elif char == curses.KEY_UP: comm.sendmessage('moveforward')
-	    elif char == curses.KEY_DOWN: comm.sendmessage('movebackward')
-	    time.sleep(0.1)
+		char = screen.getch()
+		if char == 113: break  # q
+		elif char == 65: comm.auth() # A = authentication
+		elif char == 119: comm.movePercentage('forward',percentage) # w
+		elif char == 87: comm.movePercentage('left', 0) # W
+		elif char == 97: comm.movePercentage('left',percentagedir) # a
+		elif char == 115: comm.movePercentage('backward',percentage) # s
+		elif char == 100: comm.movePercentage('right',percentagedir) #d
+		elif char == 32: comm.movePercentage('forward',0) # space
+		elif char == curses.KEY_RIGHT: comm.sendmessage('moveright')
+		elif char == curses.KEY_LEFT: comm.sendmessage('moveleft')
+		elif char == curses.KEY_UP: comm.sendmessage('moveforward')
+		elif char == curses.KEY_DOWN: comm.sendmessage('movebackward')
+		time.sleep(0.1)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='An application that sends control messages to picard')
