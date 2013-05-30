@@ -46,8 +46,24 @@ class Auth:
         self.servoDirection += int(self.limits['step'])
         self.setServo(25, self.servoDirection)
 
-  def moveInDicrection(self,direction,percentage):
-    print 'moep'
+  def moveInDirectionPercentage(self,direction,percentage):
+    val = float(percentage) / 100.0
+    if direction == 'left':
+      stepwidth = int((int(self.limits['straight'])-int(self.limits['maxleft'])) * val)
+      print 'moving ', percentage , 'percent, that is ', stepwidth, 'ms for the servo'
+      self.setServo(25, int(self.limits['straight'])-stepwidth)
+    elif direction == 'right':
+      stepwidth = int((int(self.limits['maxright'])-int(self.limits['straight'])) * val)
+      print 'moving ', percentage , 'percent, that is ', stepwidth, 'ms for the servo'
+      self.setServo(25, int(self.limits['straight'])+stepwidth)
+    elif direction == 'forward':
+      stepwidth = int((int(self.limits['stop'])-int(self.limits['maxforward'])) * val)
+      print 'moving ', percentage , 'percent, that is ', stepwidth, 'ms for the servo'
+      self.setServo(24, int(self.limits['stop'])-stepwidth)
+    elif direction == 'backward':
+      stepwidth = int((int(self.limits['maxbackward'])-int(self.limits['stop'])) * val)
+      print 'moving ', percentage , 'percent, that is ', stepwidth, 'ms for the servo'
+      self.setServo(24, int(self.limits['stop'])+stepwidth)
 
   def lookup(self,username):
     if self.Users.has_option('users', username):
@@ -109,7 +125,10 @@ class Auth:
                 print 'received sequence > stored sequence'
                 if decoded['command'].startswith('move'):
                   command = decoded['command'].replace('move','')
-                  self.moveInDirection(command)
+                  if 'percentage' in decoded:
+                    self.moveInDirectionPercentage(command, decoded['percentage'])
+                  else:
+                    self.moveInDirection(command)
 
       except ValueError, e:
         print 'JSON decoding failed: '
