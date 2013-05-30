@@ -11,6 +11,9 @@ WHITE    = ( 255, 255, 255)
 def sendCommands(right, left, forward,backwards, brake):
 	print("fooooooo")
 
+#handbrake pressed -> handbrake = True
+handbrake = False
+
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -43,7 +46,7 @@ pygame.init()
 size = [500, 700]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("PieCard")
+pygame.display.set_caption("PiCarD-Remote")
 
 #Loop until the user clicks the close button.
 done = False
@@ -67,21 +70,24 @@ while done==False:
         # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
         #every button is handbrake
         if event.type == pygame.JOYBUTTONDOWN:
+        	handbrake = True
         	print("Handbrake pressed.")
         if event.type == pygame.JOYBUTTONUP:
+        	handbrake = False
             	print("Handbrake released.")
         # my own events
         if event.type == pygame.JOYAXISMOTION:
         	if event.axis == 3:
         		# event.value between RECHTS = 1 / LINKS = -1 
         		print("right/left")
-        	if event.axis == 5:
-        		# vorwaerts : -1 ist still, 1 ist vollgas
-        		print("forward")
-        	if event.axis == 2:
-        		# backwards : -1 ist still, 1 ist vollgas
-        		print("backwards")
-            
+        	if handbrake == False:
+			if event.axis == 5:
+				# vorwaerts : -1 ist still, 1 ist vollgas
+				print("forward")
+			if event.axis == 2:
+				# backwards : -1 ist still, 1 ist vollgas
+				print("backwards")
+		    
  
     # DRAWING STEP
     # First, clear the screen to white. Don't put other drawing commands
