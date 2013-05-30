@@ -13,10 +13,12 @@ def sendCommands(right, left, forward,backwards, brake):
 
 #handbrake pressed -> handbrake = True
 handbrake = False
-forward_in = 0.0
-backward_in = 0.0
 forward = 0.0
 right = 0.0
+#joybutton = 14
+accelerate_axis = 5
+decelerate_axis = 2
+steering_axis = 0
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -46,7 +48,7 @@ pygame.init()
 
  
 # Set the width and height of the screen [width,height]
-size = [300, 200]
+size = [200, 100]
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption("PiCarD-Remote")
@@ -73,39 +75,30 @@ while done==False:
         # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
         #every button is handbrake
         if event.type == pygame.JOYBUTTONDOWN:
+        	       # handbrake = joystick.get_button(joybutton)
         	handbrake = True
         	#print("Handbrake pressed.")
         if event.type == pygame.JOYBUTTONUP:
         	handbrake = False
+        	#handbrake = joystick.get_button(joybutton)
         	#crappy code, but works
-        	forward = ((joystick.get_axis(5)+1) - (joystick.get_axis(2)+1))/2
+        	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
             	#print("Handbrake released.")
         # my own events
         if event.type == pygame.JOYAXISMOTION:
         #alternative rechts/links = axis 3
-        	if event.axis == 0:
+        	if event.axis == steering_axis:
         		right = joystick.get_axis(event.axis)
         		if abs(right) < 0.2:
         			right = 0.0
-        		# event.value between RECHTS = 1 / LINKS = -1 
-        		#print("right/left")
-        		#print"right value: {}".format(right)
-        	if handbrake == False:
-#			if event.axis == 5:
-#				# vorwaerts : -1 ist still, 1 ist vollgas
-#				forward_in = joystick.get_axis(5)+1
-#				#print("forward")
-#			if event.axis == 2:
-#				# backwards : -1 ist still, 1 ist vollgas
-#				#print("backwards")
-#				backward_in = joystick.get_axis(2)+1
-			if joystick.get_numaxes() >= 5:
-				if event.axis == 5 or event.axis == 2:
-					forward = ((joystick.get_axis(5)+1) - (joystick.get_axis(2)+1))/2
-					#print"forward value: {}".format(forward)
+        	if handbrake == True:
+        		forward = 0.0;
+
 		else:
-			forward = 0.0;
-			#print"forward value: {}".format(forward)
+			if joystick.get_numaxes() >= accelerate_axis and joystick.get_numaxes() >= decelerate_axis:
+				if event.axis == accelerate_axis or event.axis == decelerate_axis:
+					forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
+					#print"forward value: {}".format(forward)
 		    
  
     # DRAWING STEP
