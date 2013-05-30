@@ -1,0 +1,7 @@
+Joystick name: Microsoft X-Box 360 pad
+
+Rechts:		axis0: 1
+Links:		axis0:-1 
+Vorwärts:	axis5: (-1 - 1)
+Rückwärts:	axis2: (-1 - 1)
+Handbremse:	button0: (1)
