@@ -13,7 +13,8 @@ def sendCommands(right, left, forward,backwards, brake):
 
 #handbrake pressed -> handbrake = True
 handbrake = False
-
+forward_in = 0.0
+backward_in = 0.0
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -83,10 +84,18 @@ while done==False:
         	if handbrake == False:
 			if event.axis == 5:
 				# vorwaerts : -1 ist still, 1 ist vollgas
-				print("forward")
+				forward_in = joystick.get_axis(5)+1
+				#print("forward")
 			if event.axis == 2:
 				# backwards : -1 ist still, 1 ist vollgas
-				print("backwards")
+				#print("backwards")
+				backward_in = joystick.get_axis(2)+1
+			forward = (forward_in - backward_in)/2
+			#print("forward ".format(forward))
+			print"forward value: {}".format(forward)
+		else:
+			forward = 0;
+			print"forward value: {}".format(forward)
 		    
  
     # DRAWING STEP
