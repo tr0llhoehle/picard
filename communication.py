@@ -34,6 +34,7 @@ class Communication:
 			decoded = json.loads(data)
 			if(decoded.get('error', 'success') == 'success'):
 				print 'authenticated'
+				self.keepalive()
 			else:
 				print 'error authenticating'
 
@@ -45,6 +46,15 @@ class Communication:
 		ha2 = m.hexdigest()
 		m.update(ha1+':'+self.nonce+':'+ha2)
 		return m.hexdigest()
+
+	def keepalive(self):
+		self.sequence += 1
+		hash = self.gethash()
+		command = 'keepalive'
+		message = '{"sequence":'+str(self.sequence)+',"command":"'+command+'", "username":"'+self.username+'", "hash":"'+hash+'"}'
+		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
+    	t = threading.Timer(0.2, self.keepalive)
+    	t.start()
 
 	def movePercentage(self,direction,percentage):
 		self.sequence += 1
