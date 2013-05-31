@@ -1,5 +1,7 @@
 #! /usr/bin/python2.7
 import pygame
+import communication
+#import ConfigParser
 
 # taken from http://www.pygame.org/docs/ref/joystick.html
 
@@ -7,14 +9,21 @@ import pygame
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
 
-# this funktion is used to convert the axes to steering information
-def sendCommands(right, left, forward,backwards, brake):
-	print("fooooooo")
 
+#connection settings
+username = ''
+password = ''
+ip = '127.0.0.1'
+port = 5005
+sourceport = 6666
+
+#keymap
 #handbrake pressed -> handbrake = True
 handbrake = False
 forward = 0.0
+forward_old = 0.0
 right = 0.0
+right_old = 0.0
 joybutton = 14
 accelerate_axis = 13
 decelerate_axis = 12
@@ -22,6 +31,25 @@ steering_axis = 0
 trimbutton = 3
 trim = False
 deadzone = 0.0
+
+communicator = None
+
+
+def initNetwork():
+    global communicator
+#    self.Users = ConfigParser.ConfigParser()
+#    self.Users.read('users.ini')
+#    communicator = communication.Communication(username, password, ip, port, sourceport)
+    communicator = communication.Communication(username, password, ip, port, sourceport)
+    communicator.auth()
+
+# this funktion is used to convert the axes to steering information
+def sendCommand(direction, percentage_float):
+    global communicator
+    if(communicator != None):
+		percentage_int = int(percentage_float*100)
+		communicator.movePercentage(direction,percentage_int)
+		
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -48,6 +76,8 @@ class TextPrint:
     
 
 pygame.init()
+
+initNetwork()
 
  
 # Set the width and height of the screen [width,height]
@@ -130,6 +160,24 @@ while done==False:
     for i in range(joystick_count):
         joystick = pygame.joystick.Joystick(i)
         joystick.init()
+   
+   
+   #send messages
+    if (abs(abs(forward) - abs(forward_old)) > 0.01):
+       	forward_old = forward
+       	if(forward >= 0.0):
+		    sendCommand('forward',forward)
+       	else:
+		    sendCommand('backwards', abs(forward))
+    if (abs(abs(right) - abs(right_old)) > 0.01):
+        right_old = right
+        if(right >= 0.0):
+		    sendCommand('right',right)
+		    #print(right)
+        else:
+	    	sendCommand('left', abs(right))
+
+   
     
     #print own foo
     textPrint.foo(screen, "trim value: {}".format(trim) )

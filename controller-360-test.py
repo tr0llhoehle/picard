@@ -26,16 +26,16 @@ sourceport = 6666
 communicator = None
 
 def initNetwork():
-	communicator = communication.Communication(username, password, ip, port, sourceport)
+    global communicator
+    communicator = communication.Communication(username, password, ip, port, sourceport)
+    communicator.auth()
 
 # this funktion is used to convert the axes to steering information
 def sendCommand(direction, percentage_float):
-	if(communicator != None):
+    global communicator
+    if(communicator != None):
 		percentage_int = int(percentage_float*100)
-		communicator.movePercentage(self,direction,percentage_int)
-	else:
-		print("Communicator is None")
-
+		communicator.movePercentage(direction,percentage_int)
 
 #handbrake pressed -> handbrake = True
 handbrake = False
@@ -44,7 +44,6 @@ forward_old = 0.0
 right = 0.0
 right_old = 0.0
 #joybutton = 14
-
 
 
 # This is a simple class that will help us print to the screen
@@ -115,7 +114,7 @@ while done==False:
         	handbrake = False
         	#handbrake = joystick.get_button(joybutton)
         	#crappy code, but works
-        	forward_old = forward
+        	#forward_old = forward
         	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
             	#print("Handbrake released.")
             	trim = joystick.get_button(trimbutton)
@@ -123,18 +122,21 @@ while done==False:
         if event.type == pygame.JOYAXISMOTION:
         #alternative rechts/links = axis 3
         	if event.axis == steering_axis:
-        		right = joystick.get_axis(event.axis)
-        		if abs(right) < deadzone:
-        			right_old = right
-        			right = 0.0
+        		#right = joystick.get_axis(event.axis)
+        		if abs(joystick.get_axis(event.axis)) > deadzone:
+        			#right_old = right
+        			right = joystick.get_axis(event.axis)
+        		else:
+        		    #right_old = right
+        		    right = 0.0
         	if handbrake == True:
-        		forward_old = forward
+        		#forward_old = forward
         		forward = 0.0;
 
 		else:
 			if joystick.get_numaxes() >= accelerate_axis and joystick.get_numaxes() >= decelerate_axis:
 				if event.axis == accelerate_axis or event.axis == decelerate_axis:
-					forward_old = forward
+					#forward_old = forward
 					forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
 					#print"forward value: {}".format(forward)
 		    
@@ -162,18 +164,20 @@ while done==False:
     textPrint.foo(screen, "right value: {}".format(right) )
     #textPrint.indent()
     
-#send messages
-    if (abs(abs(forward) - abs(forward_old)) > 0.05):
-   	if(forward > 0.0):
-		sendCommand('forward',forward)
-   	else:
-		sendCommand('backwards', abs(forward))
-    if (abs(abs(right) - abs(right_old)) > 0.05):
-	if(right > 0.0):
-		sendCommand('right',right)
-		#print(right)
-	else:
-		sendCommand('left', abs(right))
+   #send messages
+    if (abs(abs(forward) - abs(forward_old)) > 0.01):
+       	forward_old = forward
+       	if(forward >= 0.0):
+		    sendCommand('forward',forward)
+       	else:
+		    sendCommand('backwards', abs(forward))
+    if (abs(abs(right) - abs(right_old)) > 0.01):
+        right_old = right
+        if(right >= 0.0):
+		    sendCommand('right',right)
+		    #print(right)
+        else:
+	    	sendCommand('left', abs(right))
 
 
 
