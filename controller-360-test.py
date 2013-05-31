@@ -23,16 +23,20 @@ ip = '127.0.0.1'
 port = 5005
 sourceport = 6666
 
+communicator = None
+
 def initNetwork():
 	communicator = communication.Communication(username, password, ip, port, sourceport)
-initNetwork()
 
 # this funktion is used to convert the axes to steering information
 def sendCommand(direction, percentage_float):
-	percentage_int = int(percentage_float*100)
-	communicator.movePercentage(self,direction,percentage_int)
+	if(communicator != None):
+		percentage_int = int(percentage_float*100)
+		communicator.movePercentage(self,direction,percentage_int)
+	else:
+		print("Communicator is None")
 
-communicator = 0
+
 #handbrake pressed -> handbrake = True
 handbrake = False
 forward = 0.0
@@ -159,16 +163,17 @@ while done==False:
     #textPrint.indent()
     
 #send messages
-    if (abs(forward - forward_old) > 0.05):
+    if (abs(abs(forward) - abs(forward_old)) > 0.05):
    	if(forward > 0.0):
 		sendCommand('forward',forward)
    	else:
 		sendCommand('backwards', abs(forward))
-    if abs(right - right_old) > 0.05:
+    if (abs(abs(right) - abs(right_old)) > 0.05):
 	if(right > 0.0):
-		sendCommand('right',right*100)
+		sendCommand('right',right)
+		#print(right)
 	else:
-		sendCommand('left', abs(right)*100)
+		sendCommand('left', abs(right))
 
 
 
