@@ -1,7 +1,7 @@
 #! /usr/bin/python2.7
 import pygame
 import communication
-#import ConfigParser
+import ConfigParser
 
 # taken from http://www.pygame.org/docs/ref/joystick.html
 
@@ -11,8 +11,8 @@ WHITE    = ( 255, 255, 255)
 
 
 #connection settings
-username = ''
-password = ''
+#username = ''
+#password = ''
 ip = '127.0.0.1'
 port = 5005
 sourceport = 6666
@@ -34,13 +34,45 @@ deadzone = 0.0
 
 communicator = None
 
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
+
 
 def initNetwork():
     global communicator
-#    self.Users = ConfigParser.ConfigParser()
-#    self.Users.read('users.ini')
-#    communicator = communication.Communication(username, password, ip, port, sourceport)
+    Users = ConfigParser.ConfigParser()
+    Users.read('users.ini')
+    options = Users.options('users')
+#    print(options)
+    dict1 = {}
+    for option in options:
+        username = option
+#        print(username)
+        try:
+            dict1[option] = Users.get('users', option)
+            password = dict1[username]
+#            print(password)
+#            print(dict1)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+            return
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    
+
     communicator = communication.Communication(username, password, ip, port, sourceport)
+#    communicator = communication.Communication(username, password, ip, port, sourceport)
     communicator.auth()
 
 # this funktion is used to convert the axes to steering information
