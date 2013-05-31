@@ -7,6 +7,7 @@ import md5
 import ConfigParser
 import threading
 import time
+import argparse
 try:
   from RPIO import PWM
   DEBUG = False
@@ -14,7 +15,7 @@ except ImportError:
   DEBUG = True
 
 class Auth:
-  def __init__(self):
+  def __init__(self, disablesafeguard):
     self.UDP_IP = '127.0.0.1'
     self.UDP_PORT = 5005
     self.sequence = 0
@@ -31,6 +32,7 @@ class Auth:
     self.nonces = {}
     self.sequences = {}
     self.lastcommandtime = time.time()
+    self.disablesafeguard = disablesafeguard
     if not DEBUG:
       self.servo = PWM.Servo(0,20000,int(self.limits['step']))
 
@@ -76,12 +78,13 @@ class Auth:
       return False
 
   def saveGuard(self):
-    print "saveGuard"
-    if self.lastcommandtime < time.time()-0.5:
-      self.moveInDirectionPercentage('forward', 0);
-      print 'STOP'
-    t = threading.Timer(0.5, self.saveGuard)
-    t.start()
+    if(self.disablesafeguard == False):
+      print "saveGuard"
+      if self.lastcommandtime < time.time()-0.5:
+        self.moveInDirectionPercentage('forward', 0);
+        print 'STOP'
+      t = threading.Timer(0.5, self.saveGuard)
+      t.start()
 
   def loop(self):
     self.saveGuard()
@@ -153,5 +156,9 @@ class Auth:
         print e
 
 if __name__ == '__main__':
-  auth = Auth()
+  parser = argparse.ArgumentParser(description='Picard a daemon that controls a rc car that is connected to a raspberry pi')
+
+  parser.add_argument('--disablesafeguard', action='store_true')
+  results = parser.parse_args()
+  auth = Auth(results.disablesafeguard)
   auth.loop()
