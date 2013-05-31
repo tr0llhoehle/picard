@@ -20,9 +20,9 @@ deadzone = 0.2
 #connection settings
 #username = ''
 #password = ''
-ip = '127.0.0.1'
-port = 5005
-sourceport = 6666
+#ip = '127.0.0.1'
+#port = 5005
+#sourceport = 6666
 
 communicator = None
 
@@ -47,7 +47,25 @@ def initNetwork():
         except:
             print("exception on %s!" % option)
             dict1[option] = None
-    
+    Network = ConfigParser.ConfigParser()
+    Network.read('network.ini')
+    netOptions = Network.options('network')
+
+    dict1 = {}
+    for option in netOptions:
+        try:
+            dict1[option] = Network.get('network', option)
+
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+
+    ip = dict1['ip']
+    port = int(dict1['port'])
+    sourceport = int(dict1['sourceport'])    
 
     communicator = communication.Communication(username, password, ip, port, sourceport)
     communicator.auth()
@@ -192,7 +210,7 @@ while done==False:
        	if(forward >= 0.0):
 		    sendCommand('forward',forward)
        	else:
-		    sendCommand('backwards', abs(forward))
+		    sendCommand('backward', abs(forward))
     if (abs(abs(right) - abs(right_old)) > 0.01):
         right_old = right
         if(right >= 0.0):
