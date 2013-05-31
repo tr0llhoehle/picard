@@ -5,12 +5,6 @@ import sys
 import md5
 import json
 
-username = ''
-password = ''
-ip = '127.0.0.1'
-port = 5005
-sourceport = 6666
-
 class Communication:
 	def __init__(self, username, password, ip, port, sourceport):
 		self.UDP_IP =  ip
