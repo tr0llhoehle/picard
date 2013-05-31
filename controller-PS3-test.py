@@ -21,6 +21,7 @@ decelerate_axis = 12
 steering_axis = 0
 trimbutton = 3
 trim = False
+deadzone = 0.0
 # This is a simple class that will help us print to the screen
 # It has nothing to do with the joysticks, just outputing the
 # information.
@@ -93,8 +94,8 @@ while done==False:
         #alternative rechts/links = axis 3
         	if event.axis == steering_axis:
         		right = joystick.get_axis(event.axis)
-#        		if abs(right) < 0.2:
-#        			right = 0.0
+        		if abs(right) < deadzone:
+        			right = 0.0
         		# event.value between RECHTS = 1 / LINKS = -1 
         		#print("right/left")
         		#print"right value: {}".format(right)
