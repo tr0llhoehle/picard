@@ -5,6 +5,8 @@ import random
 from Crypto.Random.random import getrandbits
 import md5
 import ConfigParser
+import threading
+import time
 try:
   from RPIO import PWM
   DEBUG = False
@@ -28,6 +30,7 @@ class Auth:
     self.servoDirection = int(self.limits['straight'])
     self.nonces = {}
     self.sequences = {}
+    self.lastcommandtime = time.time()
     if not DEBUG:
       self.servo = PWM.Servo(0,20000,int(self.limits['step']))
 
@@ -47,6 +50,7 @@ class Auth:
         self.setServo(25, self.servoDirection)
 
   def moveInDirectionPercentage(self,direction,percentage):
+    self.lastcommandtime = time.time()
     val = float(percentage) / 100.0
     if direction == 'left':
       stepwidth = int((int(self.limits['straight'])-int(self.limits['maxleft'])) * val)
@@ -71,7 +75,16 @@ class Auth:
     else:
       return False
 
+  def saveGuard(self):
+    print "saveGuard"
+    if self.lastcommandtime < time.time()-0.5:
+      self.moveInDirectionPercentage('forward', 0);
+      print 'STOP'
+    t = threading.Timer(0.5, self.saveGuard)
+    t.start()
+
   def loop(self):
+    self.saveGuard()
     while True:
       data, addr = self.sock.recvfrom(1024)
       print "received message:", data, addr
@@ -129,6 +142,8 @@ class Auth:
                     self.moveInDirectionPercentage(command, decoded['percentage'])
                   else:
                     self.moveInDirection(command)
+                elif decoded['command'] == 'keepalive':
+                  self.lastcommandtime = time.time()
 
       except ValueError, e:
         print 'JSON decoding failed: '
