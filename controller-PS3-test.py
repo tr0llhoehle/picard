@@ -13,9 +13,9 @@ WHITE    = ( 255, 255, 255)
 #connection settings
 #username = ''
 #password = ''
-ip = '127.0.0.1'
-port = 5005
-sourceport = 6666
+#ip = '127.0.0.1'
+#port = 5005
+#sourceport = 6666
 
 #keymap
 #handbrake pressed -> handbrake = True
@@ -69,10 +69,34 @@ def initNetwork():
         except:
             print("exception on %s!" % option)
             dict1[option] = None
-    
+            
+    Network = ConfigParser.ConfigParser()
+    Network.read('network.ini')
+    netOptions = Network.options('network')
+#    print(options)
+    dict1 = {}
+    for option in netOptions:
+#        username = option
+#        print(username)
+        try:
+            dict1[option] = Network.get('network', option)
+#            password = dict1[username]
+#            print(password)
+#            print(dict1)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+#            break
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+#    print(dict1)
+#    print(dict1['ip'])
+    ip = dict1['ip']
+    port = int(dict1['port'])
+    sourceport = int(dict1['sourceport'])
 
+#    communicator = communication.Communication(username, password, dict1['ip'], dict1['port'], dict1['sourceport'])
     communicator = communication.Communication(username, password, ip, port, sourceport)
-#    communicator = communication.Communication(username, password, ip, port, sourceport)
     communicator.auth()
 
 # this funktion is used to convert the axes to steering information
