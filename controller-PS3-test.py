@@ -65,7 +65,7 @@ def initNetwork():
 #            print(dict1)
             if dict1[option] == -1:
                 DebugPrint("skip: %s" % option)
-            return
+            break
         except:
             print("exception on %s!" % option)
             dict1[option] = None
