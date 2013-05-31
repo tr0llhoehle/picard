@@ -1,6 +1,7 @@
 #! /usr/bin/python2.7
 import pygame
 import communication
+import ConfigParser
 
 # taken from http://www.pygame.org/docs/ref/joystick.html
 
@@ -17,8 +18,8 @@ trim = False
 deadzone = 0.2
 
 #connection settings
-username = ''
-password = ''
+#username = ''
+#password = ''
 ip = '127.0.0.1'
 port = 5005
 sourceport = 6666
@@ -27,6 +28,27 @@ communicator = None
 
 def initNetwork():
     global communicator
+    Users = ConfigParser.ConfigParser()
+    Users.read('users.ini')
+    options = Users.options('users')
+#    print(options)
+    dict1 = {}
+    for option in options:
+        username = option
+#        print(username)
+        try:
+            dict1[option] = Users.get('users', option)
+            password = dict1[username]
+#            print(password)
+#            print(dict1)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+            break
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    
+
     communicator = communication.Communication(username, password, ip, port, sourceport)
     communicator.auth()
 
