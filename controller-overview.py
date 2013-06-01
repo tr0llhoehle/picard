@@ -69,33 +69,33 @@ while done==False:
         if event.type == pygame.QUIT: # If user clicked close
             done=True # Flag that we are done so we exit this loop
         
-        # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
-        #every button is handbrake
-        if event.type == pygame.JOYBUTTONDOWN:
-        	       # handbrake = joystick.get_button(joybutton)
-        	handbrake = True
-        	#print("Handbrake pressed.")
-        if event.type == pygame.JOYBUTTONUP:
-        	handbrake = False
-        	#handbrake = joystick.get_button(joybutton)
-        	#crappy code, but works
-        	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
-            	#print("Handbrake released.")
-        # my own events
-        if event.type == pygame.JOYAXISMOTION:
-        #alternative rechts/links = axis 3
-        	if event.axis == steering_axis:
-        		right = joystick.get_axis(event.axis)
-        		if abs(right) < 0.2:
-        			right = 0.0
-        	if handbrake == True:
-        		forward = 0.0;
+#        # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
+#        #every button is handbrake
+#        if event.type == pygame.JOYBUTTONDOWN:
+#        	       # handbrake = joystick.get_button(joybutton)
+#        	handbrake = True
+#        	#print("Handbrake pressed.")
+#        if event.type == pygame.JOYBUTTONUP:
+#        	handbrake = False
+#        	#handbrake = joystick.get_button(joybutton)
+#        	#crappy code, but works
+#        	forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
+#            	#print("Handbrake released.")
+#        # my own events
+#        if event.type == pygame.JOYAXISMOTION:
+#        #alternative rechts/links = axis 3
+#        	if event.axis == steering_axis:
+#        		right = joystick.get_axis(event.axis)
+#        		if abs(right) < 0.2:
+#        			right = 0.0
+#        	if handbrake == True:
+#        		forward = 0.0;
 
-		else:
-			if joystick.get_numaxes() >= accelerate_axis and joystick.get_numaxes() >= decelerate_axis:
-				if event.axis == accelerate_axis or event.axis == decelerate_axis:
-					forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
-					#print"forward value: {}".format(forward)
+#		else:
+#			if joystick.get_numaxes() >= accelerate_axis and joystick.get_numaxes() >= decelerate_axis:
+#				if event.axis == accelerate_axis or event.axis == decelerate_axis:
+#					forward = ((joystick.get_axis(accelerate_axis)+1) - (joystick.get_axis(decelerate_axis)+1))/2
+#					#print"forward value: {}".format(forward)
 		    
  
     # DRAWING STEP
@@ -112,13 +112,13 @@ while done==False:
         joystick = pygame.joystick.Joystick(i)
         joystick.init()
     
-    #print own foo
-    textPrint.foo(screen, "handbrake value: {}".format(handbrake) )
-    #textPrint.indent()
-    textPrint.foo(screen, "forward value: {}".format(forward) )
-    #textPrint.indent()
-    textPrint.foo(screen, "right value: {}".format(right) )
-    #textPrint.indent()
+#    #print own foo
+#    textPrint.foo(screen, "handbrake value: {}".format(handbrake) )
+#    #textPrint.indent()
+#    textPrint.foo(screen, "forward value: {}".format(forward) )
+#    #textPrint.indent()
+#    textPrint.foo(screen, "right value: {}".format(right) )
+#    #textPrint.indent()
     
 
 
