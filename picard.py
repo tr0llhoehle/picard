@@ -86,16 +86,16 @@ class Auth:
     else:
       return False
 
-  def saveGuard(self):
+  def safeGuard(self):
     if(self.disablesafeguard == False):
       if self.lastcommandtime < time.time()-0.5:
         self.moveInDirectionPercentage('forward', 0);
         print 'STOP'
-      self.timer = threading.Timer(0.5, self.saveGuard)
+      self.timer = threading.Timer(0.5, self.safeGuard)
       self.timer.start()
 
   def loop(self):
-    self.saveGuard()
+    self.safeGuard()
     while True:
       data, addr = self.sock.recvfrom(1024)
       print "received message:", data, addr
