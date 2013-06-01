@@ -7,6 +7,7 @@ import json
 import threading
 
 class Communication:
+#	timer_enabled = True
 	def __init__(self, username, password, ip, port, sourceport):
 		self.UDP_IP =  ip
 		self.UDP_PORT = port
@@ -17,6 +18,7 @@ class Communication:
 		self.nonce = ''
 		self.username = username
 		self.password = password
+		self.timer_enabled = True
 
 	def auth(self):
 		message = '{"sequence":0, "command":"requestauth", "username":"'+self.username+'"}'
@@ -54,8 +56,18 @@ class Communication:
 		command = 'keepalive'
 		message = '{"sequence":'+str(self.sequence)+',"command":"'+command+'", "username":"'+self.username+'", "hash":"'+hash+'"}'
 		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
-    	t = threading.Timer(0.2, self.keepalive)
-    	t.start()
+		self.setupTimer()
+    	
+	def killTimer(self):
+#	    global timer_enabled
+	    self.timer_enabled = False
+	
+	def setupTimer(self):
+#	    global timer_enabled
+	    #print("keepalive")
+	    if self.timer_enabled == True:
+	        t = threading.Timer(0.2,self.keepalive)
+	        t.start()
 
 	def movePercentage(self,direction,percentage):
 		self.sequence += 1
