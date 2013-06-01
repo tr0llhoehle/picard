@@ -36,6 +36,7 @@ class Auth:
     self.lastcommandtime = time.time()
     self.disablesafeguard = disablesafeguard
     self.timer = None
+    self.ledstatus = False
     signal.signal(signal.SIGINT, self.signal_handler)
     if not DEBUG:
       self.servo = PWM.Servo(0,20000,int(self.limits['step']))
@@ -166,6 +167,19 @@ class Auth:
                     self.moveInDirection(command)
                 elif decoded['command'] == 'keepalive':
                   self.lastcommandtime = time.time()
+                elif decoded['command'] == 'speed':
+                  if 'percentage' in decoded:
+                    if int(decoded['percentage']) > 0:
+                      self.moveInDirectionPercentage('forward', decoded['percentage'])
+                    else:
+                      self.moveInDirectionPercentage('backward', (-1)*int(decoded['percentage']))
+                elif decoded['command'] == 'direction':
+                  if 'percentage' in decoded:
+                    if int(decoded['percentage']) > 0:
+                      self.moveInDirectionPercentage('right', decoded['percentage'])
+                    else:
+                      self.moveInDirectionPercentage('left', (-1)*int(decoded['percentage']))
+ 
 
       except ValueError, e:
         print 'JSON decoding failed: '
