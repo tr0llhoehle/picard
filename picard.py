@@ -8,6 +8,8 @@ import ConfigParser
 import threading
 import time
 import argparse
+import signal
+import sys
 try:
   from RPIO import PWM
   DEBUG = False
@@ -33,8 +35,14 @@ class Auth:
     self.sequences = {}
     self.lastcommandtime = time.time()
     self.disablesafeguard = disablesafeguard
+    self.timer = None
+    signal.signal(signal.SIGINT, self.signal_handler)
     if not DEBUG:
       self.servo = PWM.Servo(0,20000,int(self.limits['step']))
+
+  def signal_handler(self, signal, frame):
+    self.disablesafeguard = True
+    sys.exit(0)
 
   def setServo(self, pin, value):
     if not DEBUG:
@@ -83,8 +91,8 @@ class Auth:
       if self.lastcommandtime < time.time()-0.5:
         self.moveInDirectionPercentage('forward', 0);
         print 'STOP'
-      t = threading.Timer(0.5, self.saveGuard)
-      t.start()
+      self.timer = threading.Timer(0.5, self.saveGuard)
+      self.timer.start()
 
   def loop(self):
     self.saveGuard()
