@@ -88,7 +88,6 @@ class Auth:
 
   def saveGuard(self):
     if(self.disablesafeguard == False):
-      print "saveGuard"
       if self.lastcommandtime < time.time()-0.5:
         self.moveInDirectionPercentage('forward', 0);
         print 'STOP'
