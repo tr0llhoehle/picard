@@ -4,3 +4,8 @@ users.ini/communication.pyc
 /network.ini
 /communication.pyc
 /users.ini
+/mjpeg-stream/Stream-Client2.py
+/mjpeg-stream/Stream-Client.py
+/mjpeg-stream/StreamViewer.py
+/mjpeg-stream/StreamViewer.pyc
+/StreamViewer.pyc
