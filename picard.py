@@ -99,8 +99,8 @@ class Auth:
           if(self.lookup(decoded['username'])):
             self.nonces[decoded['username']] = str(getrandbits(128))
             self.sequences[decoded['username']] = random.randint(1,65536)
-            print self.nonces[decoded['username']]
-            print self.sequences[decoded['username']]
+            print 'nonce',self.nonces[decoded['username']]
+            print 'seq',self.sequences[decoded['username']]
             message = '{"sequence":'+str(self.sequences[decoded['username']])+',"realm":"'+self.realm+'", "nonce":"'+self.nonces[decoded['username']]+'"}'
           else:
             message = '{"error":"username not found"}'
@@ -110,10 +110,19 @@ class Auth:
           m = md5.new()
           m.update(decoded['username']+':'+decoded['realm']+':'+self.Users.get('users', decoded['username']))
           ha1 = m.hexdigest()
-          m.update('AUTH:'+str(decoded['sequence']))
+          print 'ha1', ha1
+          test = 'AUTH:'+str(decoded['sequence'])
+          print 'lol?' + test
+          m = md5.new()
+          m.update(test)
+          print 'auth+seq', 'AUTH:'+str(decoded['sequence'])
           ha2 = m.hexdigest()
+          print 'sequence', decoded['sequence']
+          print 'ha2', ha2
+          m = md5.new()
           m.update(ha1+':'+self.nonces[decoded['username']]+':'+ha2)
           response = m.hexdigest()
+          print 'response' , response
 
           if(response == decoded['response']):
             print 'authenticated'
@@ -129,8 +138,10 @@ class Auth:
             m = md5.new()
             m.update(decoded['username']+':'+self.realm+':'+self.Users.get('users', decoded['username']))
             ha1 = m.hexdigest()
+            m = md5.new()
             m.update('AUTH:'+str(decoded['sequence']))
             ha2 = m.hexdigest()
+            m = md5.new()
             m.update(ha1+':'+self.nonces[decoded['username']]+':'+ha2)
             if(decoded['hash'] == m.hexdigest()):
               print 'correct hash'

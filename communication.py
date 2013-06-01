@@ -7,7 +7,6 @@ import json
 import threading
 
 class Communication:
-#	timer_enabled = True
 	def __init__(self, username, password, ip, port, sourceport):
 		self.UDP_IP =  ip
 		self.UDP_PORT = port
@@ -45,8 +44,10 @@ class Communication:
 		m = md5.new()
   		m.update(self.username+':'+self.realm+':'+self.password)
 		ha1 = m.hexdigest()
+		m = md5.new()
 		m.update('AUTH:'+str(self.sequence))
 		ha2 = m.hexdigest()
+		m = md5.new()
 		m.update(ha1+':'+self.nonce+':'+ha2)
 		return m.hexdigest()
 
@@ -59,12 +60,9 @@ class Communication:
 		self.setupTimer()
     	
 	def killTimer(self):
-#	    global timer_enabled
 	    self.timer_enabled = False
 	
 	def setupTimer(self):
-#	    global timer_enabled
-	    #print("keepalive")
 	    if self.timer_enabled == True:
 	        t = threading.Timer(0.2,self.keepalive)
 	        t.start()
