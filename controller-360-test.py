@@ -3,6 +3,8 @@ import pygame
 import communication
 import ConfigParser
 
+import subprocess
+
 # taken from http://www.pygame.org/docs/ref/joystick.html
 
 # Define some colors
@@ -17,17 +19,19 @@ trimbutton = 7
 trim = False
 deadzone = 0.2
 
-#connection settings
-#username = ''
-#password = ''
-#ip = '127.0.0.1'
-#port = 5005
-#sourceport = 6666
+#handbrake pressed -> handbrake = True
+handbrake = False
+forward = 0.0
+forward_old = 0.0
+right = 0.0
+right_old = 0.0
+#joybutton = 14
 
 communicator = None
 
 def initNetwork():
     global communicator
+    global sourceIP
     Users = ConfigParser.ConfigParser()
     Users.read('users.ini')
     options = Users.options('users')
@@ -64,6 +68,7 @@ def initNetwork():
             dict1[option] = None
 
     ip = dict1['ip']
+    sourceIP = ip
     port = int(dict1['port'])
     sourceport = int(dict1['sourceport'])    
 
@@ -76,14 +81,6 @@ def sendCommand(direction, percentage_float):
     if(communicator != None):
 		percentage_int = int(percentage_float*100)
 		communicator.movePercentage(direction,percentage_int)
-
-#handbrake pressed -> handbrake = True
-handbrake = False
-forward = 0.0
-forward_old = 0.0
-right = 0.0
-right_old = 0.0
-#joybutton = 14
 
 
 # This is a simple class that will help us print to the screen
@@ -114,7 +111,8 @@ initNetwork()
 
 pygame.init()
 
-
+#Mjpeg-stream
+child = subprocess.Popen("./Stream-Client.py")
  
 # Set the width and height of the screen [width,height]
 size = [200, 100]
@@ -187,6 +185,9 @@ while done==False:
     screen.fill(WHITE)
     textPrint.reset()
     
+#    #exit on child exit
+#    if child.poll() == True:
+#        done = True
     
     # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
@@ -218,58 +219,8 @@ while done==False:
 		    #print(right)
         else:
 	    	sendCommand('left', abs(right))
+	
 
-
-
-
-#    textPrint.foo(screen, "Number of joysticks: {}".format(joystick_count) )
-#    textPrint.indent()
-#    
-#    # For each joystick:
-#    for i in range(joystick_count):
-#        joystick = pygame.joystick.Joystick(i)
-#        joystick.init()
-#    
-#        textPrint.foo(screen, "Joystick {}".format(i) )
-#        textPrint.indent()
-#    
-#        # Get the name from the OS for the controller/joystick
-#        name = joystick.get_name()
-#        textPrint.foo(screen, "Joystick name: {}".format(name) )
-#        
-#        
-#        # Usually axis run in pairs, up/down for one, and left/right for
-#        # the other.
-#        axes = joystick.get_numaxes()
-#        textPrint.foo(screen, "Number of axes: {}".format(axes) )
-#        textPrint.indent()
-#        
-#        for i in range( axes ):
-#            axis = joystick.get_axis( i )
-#            textPrint.foo(screen, "Axis {} value: {:>6.3f}".format(i, axis) )
-#        textPrint.unindent()
-#            
-#        buttons = joystick.get_numbuttons()
-#        textPrint.foo(screen, "Number of buttons: {}".format(buttons) )
-#        textPrint.indent()
-
-#        for i in range( buttons ):
-#            button = joystick.get_button( i )
-#            textPrint.foo(screen, "Button {:>2} value: {}".format(i,button) )
-#        textPrint.unindent()
-#            
-#        # Hat switch. All or nothing for direction, not like joysticks.
-#        # Value comes back in an array.
-#        hats = joystick.get_numhats()
-#        textPrint.foo(screen, "Number of hats: {}".format(hats) )
-#        textPrint.indent()
-
-#        for i in range( hats ):
-#            hat = joystick.get_hat( i )
-#            textPrint.foo(screen, "Hat {} value: {}".format(i, str(hat)) )
-#        textPrint.unindent()
-#        
-#        textPrint.unindent()
 
     
     # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
@@ -283,5 +234,13 @@ while done==False:
 # Close the window and quit.
 # If you forget this line, the program will 'hang'
 # on exit if running from IDLE.
+#t._stop()
 communicator.killTimer()
+
+#try to kill child
+try:
+    child.kill()
+except Exception, e:
+    print("child is closed")
 pygame.quit()
+
