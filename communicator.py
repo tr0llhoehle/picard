@@ -7,6 +7,7 @@ import sys
 import md5
 import json
 import argparse
+import communication
 
 username = ''
 password = ''
@@ -14,74 +15,11 @@ ip = '127.0.0.1'
 port = 5005
 sourceport = 6666
 
-class Communication:
-	def __init__(self, screen, username, password, ip, port, sourceport):
-		self.screen = screen
-		self.UDP_IP =  ip
-		self.UDP_PORT = port
-		self.sequence = 0
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		self.sock.bind(('', sourceport))
-		self.realm = ''
-		self.nonce = ''
-		self.username = username
-		self.password = password
-
-	def sendmessage(self, command):
-		self.sequence += 1
-		hash = self.gethash()
-		message = '{"sequence":'+str(self.sequence)+',"command":"'+command+'", "username":"'+self.username+'", "hash":"'+hash+'"}'
-		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
-
-	def auth(self):
-		message = '{"sequence":0, "command":"requestauth", "username":"'+self.username+'"}'
-		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
-		data, addr = self.sock.recvfrom(1024)
-		decoded = json.loads(data)
-
-		self.screen.clear()
-		self.screen.refresh()
-		self.screen.addstr(0,0,decoded.get('error', 'success'))
-		if(decoded.get('error', 'success') == 'success'):
-			self.realm = decoded['realm']
-			self.nonce = decoded['nonce']
-			self.sequence = decoded['sequence']+1
-			response = self.gethash()
-			message = '{"sequence":'+str(self.sequence)+', "command":"auth", "username":"'+self.username+'", "nonce":"'+decoded['nonce']+'", "response":"'+response+'", "realm":"'+decoded['realm']+'"}'
-			self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
-			self.sequence = decoded['sequence']+1
-			data, addr = self.sock.recvfrom(1024)
-			decoded = json.loads(data)
-			if(decoded.get('error', 'success') == 'success'):
-				self.screen.clear()
-				self.screen.refresh()
-				self.screen.addstr(0,0,'authenticated')
-			else:
-				self.screen.clear()
-				self.screen.refresh()
-				self.screen.addstr(0,0,'error authenticating')
-
-	def gethash(self):
-		m = md5.new()
-  		m.update(self.username+':'+self.realm+':'+self.password)
-		ha1 = m.hexdigest()
-		m.update('AUTH:'+str(self.sequence))
-		ha2 = m.hexdigest()
-		m.update(ha1+':'+self.nonce+':'+ha2)
-		return m.hexdigest()
-
-	def movePercentage(self,direction,percentage):
-		self.sequence += 1
-		hash = self.gethash()
-		command = 'move' + direction
-		message = '{"sequence":'+str(self.sequence)+',"command":"'+command+'", "percentage":'+str(percentage)+', "username":"'+self.username+'", "hash":"'+hash+'"}'
-		self.sock.sendto(message, (self.UDP_IP, self.UDP_PORT))
-
 def main(screen):
-	comm = Communication(screen, username, password, ip, port, sourceport)
+	comm = communication.Communication(username, password, ip, port, sourceport)
 	screen.nodelay(1)
 	percentagedir = 100
-	percentage = 10
+	percentage = 80
 	while True:
 		char = screen.getch()
 		if char == 113: break  # q
@@ -92,10 +30,6 @@ def main(screen):
 		elif char == 115: comm.movePercentage('backward',percentage) # s
 		elif char == 100: comm.movePercentage('right',percentagedir) #d
 		elif char == 32: comm.movePercentage('forward',0) # space
-		elif char == curses.KEY_RIGHT: comm.sendmessage('moveright')
-		elif char == curses.KEY_LEFT: comm.sendmessage('moveleft')
-		elif char == curses.KEY_UP: comm.sendmessage('moveforward')
-		elif char == curses.KEY_DOWN: comm.sendmessage('movebackward')
 		time.sleep(0.1)
 
 if __name__ == '__main__':
